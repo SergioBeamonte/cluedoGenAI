@@ -1,0 +1,76 @@
+create_scene_blueprint:
+  description: >
+    Using the current {game_state} and the latest {player_action}, design the
+    next narrative scene of the murder mystery. Focus on:
+    1. Where the scene takes place and who is present
+    2. What is happening right now (summary and key dramatic beats)
+    3. Which clues are visible to the player
+    4. Which tensions or secrets are hidden beneath the surface
+    5. What overall mood and visual hooks define this moment
+  expected_output: >
+    A valid JSON "scene_blueprint" object with at least:
+    - "scene_id": unique id or name of the scene
+    - "location": short description of the place
+    - "summary": 2–4 sentences describing the current situation
+    - "present_characters": list of character ids or names in the scene
+    - "beats": ordered list of key dramatic beats
+    - "visible_clues": list of clues that can be noticed now
+    - "hidden_tension": 1–2 sentences about underlying conflict/secrets
+    - "music_mood": a simple label for the audio agent (e.g. "tense", "calm")
+    - "visual_hooks": list of strong visual elements for the vision agent
+  agent: narrative_agent
+
+
+# TODO
+define_characters:
+  description: >
+    # TODO
+  expected_output: >
+    # TODO
+  agent: character_agent
+  context:
+    - create_scene_blueprint
+
+generate_suspect_dialogue:
+  description: >
+    # TODO
+  expected_output: >
+    # TODO
+  agent: dialogue_agent
+  context:
+    - create_scene_blueprint
+    - define_characters
+
+design_scene_visuals:
+  description: >
+    # TODO
+  expected_output: >
+    # TODO
+  agent: vision_agent
+  context:
+    - create_scene_blueprint
+    - define_characters
+    - generate_suspect_dialogue
+
+curate_scene_audio: # Delete if we delete the agent
+  description: >
+    # TODO
+  expected_output: >
+    # TODO
+  agent: audio_agent
+  context:
+    - create_scene_blueprint
+    - generate_suspect_dialogue
+
+game_play_director_step:
+  description: >
+    # TODO
+  expected_output: >
+    # TODO
+  agent: director_agent
+  context:
+    - create_scene_blueprint
+    - define_characters
+    - generate_suspect_dialogue
+    - design_scene_visuals
+    - curate_scene_audio
