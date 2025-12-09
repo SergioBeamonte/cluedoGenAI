@@ -20,7 +20,6 @@ create_scene_blueprint:
     - "visual_hooks": list of strong visual elements for the vision agent
   agent: narrative_agent
 
-
 # TODO
 define_characters:
   description: >

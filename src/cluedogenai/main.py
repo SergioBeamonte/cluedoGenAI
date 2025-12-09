@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import sys
 import warnings
 
@@ -19,7 +20,9 @@ def run():
     """
     inputs = {
         'topic': 'AI LLMs',
-        'current_year': str(datetime.now().year)
+        'current_year': str(datetime.now().year),
+        'game_state': 'Start of the game. Do not reveal any clues yet.',
+        'player_action': 'Question asked by the player'
     }
 
     try:

@@ -74,35 +74,35 @@ class Cluedogenai():
     def define_characters(self) -> Task:
         return Task(
             config=self.tasks_config['define_characters'], # type: ignore[index]
-            output_file='report.md'
+            #output_file='report.md'
         )
     
     @task
     def generate_suspect_dialogue(self) -> Task:
         return Task(
             config=self.tasks_config['generate_suspect_dialogue'], # type: ignore[index]
-            output_file='report.md'
+            #output_file='report.md'
         )
     
     @task
     def design_scene_visuals(self) -> Task:
         return Task(
             config=self.tasks_config['design_scene_visuals'], # type: ignore[index]
-            output_file='report.md'
+            #output_file='report.md'
         )
     
     @task
     def curate_scene_audio(self) -> Task: # Delete if we delete this agent
         return Task(
             config=self.tasks_config['curate_scene_audio'], # type: ignore[index]
-            output_file='report.md'
+            #output_file='report.md'
         )
     
     @task
     def game_play_director_step(self) -> Task:
         return Task(
             config=self.tasks_config['game_play_director_step'], # type: ignore[index]
-            output_file='report.md'
+            #output_file='report.md'
         )
 
     @crew

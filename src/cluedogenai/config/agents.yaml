@@ -12,20 +12,21 @@ narrative_agent:
     and exits, tensions, visible clues, and how the story should escalate.
     You are obsessed with pacing, foreshadowing, and giving the player just
     enough information to feel smart without revealing the solution too early.
-  instructions: >
-    Always take as input a structured game_state plus the latest player_action.
-    From that, you must output a scene_blueprint in JSON format with at least:
-      - "scene_id": unique id or name of the current scene
-      - "location": short string (e.g. "Open-space office", "Server room")
-      - "summary": 2–4 sentences describing what is happening in this scene
-      - "present_characters": list of character ids or names in the scene
-      - "beats": ordered list of key dramatic beats (short phrases)
-      - "visible_clues": list of clues that the player could notice now
-      - "hidden_tension": 1–2 sentences about underlying conflict or secrets
-      - "music_mood": label for the audio agent (e.g. "tense", "melancholic")
-      - "visual_hooks": list of short phrases describing strong visual elements
-    Do NOT write dialogue. Do NOT reveal who the killer is. Keep the blueprint
-    concise, focused on what the next scene should feel like and enable.
+  #instructions: > # Este atributo no está en la documentación
+    #Always take as input a structured game_state plus the latest player_action.
+    #From that, you must output a scene_blueprint in JSON format with at least:
+      #- "scene_id": unique id or name of the current scene
+      #- "location": short string (e.g. "Open-space office", "Server room")
+      #- "summary": 2–4 sentences describing what is happening in this scene
+      #- "present_characters": list of character ids or names in the scene
+      #- "beats": ordered list of key dramatic beats (short phrases)
+      #- "visible_clues": list of clues that the player could notice now
+      #- "hidden_tension": 1–2 sentences about underlying conflict or secrets
+      #- "music_mood": label for the audio agent (e.g. "tense", "melancholic")
+      #- "visual_hooks": list of short phrases describing strong visual elements
+    #Do NOT write dialogue. Do NOT reveal who the killer is. Keep the blueprint
+    #concise, focused on what the next scene should feel like and enable.
+  llm: "gemini/gemini-2.5-flash"
 
 character_agent:
   role: >
@@ -34,6 +35,7 @@ character_agent:
     # TODO
   backstory: >
     # TODO
+  llm: "gemini/gemini-2.5-flash"
 
 dialogue_agent:
   role: >
@@ -42,6 +44,8 @@ dialogue_agent:
     # TODO
   backstory: >
     # TODO
+  llm: "gemini/gemini-2.5-flash"
+
 
 vision_agent:
   role: >
@@ -50,6 +54,8 @@ vision_agent:
     # TODO
   backstory: >
     # TODO
+  llm: "gemini/gemini-2.5-flash"
+
 
 audio_agent: # OPTIONAL
   role: >
@@ -58,6 +64,8 @@ audio_agent: # OPTIONAL
     # TODO
   backstory: >
     # TODO
+  llm: "gemini/gemini-2.5-flash"
+
 
 director_agent:
   role: >
@@ -66,4 +74,4 @@ director_agent:
     # TODO
   backstory: >
     # TODO
-
+  llm: "gemini/gemini-2.5-flash"
