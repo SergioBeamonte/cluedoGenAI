@@ -57,9 +57,10 @@ class Cluedogenai():
     @agent
     def director_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['character_agent'], # type: ignore[index]
+            config=self.agents_config['director_agent'],  # <- corregido
             verbose=True
         )
+
 
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
@@ -106,15 +107,47 @@ class Cluedogenai():
         )
 
     @crew
-    def crew(self) -> Crew:
-        """Creates the Cluedogenai crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-
+    def setup_crew(self) -> Crew:
+        """Crew solo para generar la escena inicial y los sospechosos."""
         return Crew(
-            agents=self.agents, # Automatically created by the @agent decorator
-            tasks=self.tasks, # Automatically created by the @task decorator
+            agents=[
+                self.narrative_agent(),
+                self.character_agent(),
+            ],
+            tasks=[
+                self.create_scene_blueprint(),
+                self.define_characters(),
+            ],
             process=Process.sequential,
             verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+        )
+
+    @crew
+    def dialogue_crew(self) -> Crew:
+        """Crew para una ronda de diálogo (y, si quieres, visuals/audio/director)."""
+        return Crew(
+            agents=[
+                self.dialogue_agent(),
+                self.vision_agent(),
+                self.audio_agent(),
+                self.director_agent(),
+            ],
+            tasks=[
+                self.generate_suspect_dialogue(),
+                self.design_scene_visuals(),
+                self.curate_scene_audio(),
+                self.game_play_director_step(),
+            ],
+            process=Process.sequential,
+            verbose=True,
+        )
+
+    # Si quieres, puedes dejar la crew “grande” tal cual para tests manuales:
+    @crew
+    def full_crew(self) -> Crew:
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+            verbose=True,
         )
