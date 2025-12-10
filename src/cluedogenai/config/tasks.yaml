@@ -38,7 +38,17 @@ define_characters:
           "name": "Full Name",
           "role": "Job/position in the tech company"
           "age": integer,
+          "role": "Job/position in the tech company"
+          "age": integer,
           "personality": "Short description (1–2 sentences)",
+          "physical_description": {
+            "build": "skinny|fit|fat",
+            "face": "short phrase describing facial traits",
+            "hair": "short phrase describing hairstyle/color",
+            "upper_clothing": "specific color + garment (must be a unique color per suspect)",
+            "distinctive_features": "short phrase (tattoos, posture, accessories)"
+            },
+          "secret_motivation": "Hidden goal, fear or conflict. Must be subtle, realistic, and related to workplace context",
           "physical_description": {
             "build": "skinny|fit|fat",
             "face": "short phrase describing facial traits",
@@ -55,7 +65,17 @@ define_characters:
           "name": "Full Name",
           "role": "Job/position in the tech company"
           "age": integer,
+          "role": "Job/position in the tech company"
+          "age": integer,
           "personality": "Short description (1–2 sentences)",
+          "physical_description": {
+            "build": "skinny|fit|fat",
+            "face": "short phrase describing facial traits",
+            "hair": "short phrase describing hairstyle/color",
+            "upper_clothing": "specific color + garment (must be a unique color per suspect)",
+            "distinctive_features": "short phrase (tattoos, posture, accessories)"
+            },
+          "secret_motivation": "Hidden goal, fear or conflict. Must be subtle, realistic, and related to workplace context",
           "physical_description": {
             "build": "skinny|fit|fat",
             "face": "short phrase describing facial traits",
@@ -72,7 +92,17 @@ define_characters:
           "name": "Full Name",
           "role": "Job/position in the tech company"
           "age": integer,
+          "role": "Job/position in the tech company"
+          "age": integer,
           "personality": "Short description (1–2 sentences)",
+          "physical_description": {
+            "build": "skinny|fit|fat",
+            "face": "short phrase describing facial traits",
+            "hair": "short phrase describing hairstyle/color",
+            "upper_clothing": "specific color + garment (must be a unique color per suspect)",
+            "distinctive_features": "short phrase (tattoos, posture, accessories)"
+            },
+          "secret_motivation": "Hidden goal, fear or conflict. Must be subtle, realistic, and related to workplace context",
           "physical_description": {
             "build": "skinny|fit|fat",
             "face": "short phrase describing facial traits",
@@ -89,7 +119,17 @@ define_characters:
           "name": "Full Name",
           "role": "Job/position in the tech company"
           "age": integer,
+          "role": "Job/position in the tech company"
+          "age": integer,
           "personality": "Short description (1–2 sentences)",
+          "physical_description": {
+            "build": "skinny|fit|fat",
+            "face": "short phrase describing facial traits",
+            "hair": "short phrase describing hairstyle/color",
+            "upper_clothing": "specific color + garment (must be a unique color per suspect)",
+            "distinctive_features": "short phrase (tattoos, posture, accessories)"
+            },
+          "secret_motivation": "Hidden goal, fear or conflict. Must be subtle, realistic, and related to workplace context",
           "physical_description": {
             "build": "skinny|fit|fat",
             "face": "short phrase describing facial traits",
