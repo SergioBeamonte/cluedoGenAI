@@ -124,23 +124,18 @@ class Cluedogenai():
 
     @crew
     def dialogue_crew(self) -> Crew:
-        """Crew para una ronda de diálogo (y, si quieres, visuals/audio/director)."""
+        """Crew rápido: solo genera la respuesta del sospechoso."""
         return Crew(
             agents=[
                 self.dialogue_agent(),
-                self.vision_agent(),
-                self.audio_agent(),
-                self.director_agent(),
             ],
             tasks=[
                 self.generate_suspect_dialogue(),
-                self.design_scene_visuals(),
-                self.curate_scene_audio(),
-                self.game_play_director_step(),
             ],
             process=Process.sequential,
-            verbose=True,
+            verbose=False,  # menos ruido en consola
         )
+
 
     # Si quieres, puedes dejar la crew “grande” tal cual para tests manuales:
     @crew

@@ -84,25 +84,67 @@ define_characters:
 
 generate_suspect_dialogue:
   description: >
-    Write the chosen suspect's answer to the detective's latest question,
-    using the current scene_blueprint, the suspect profile and the existing
-    game_state. Focus on:
-    1. Staying in-character according to the suspect's personality and role
-    2. Respecting the underlying case logic and previously revealed facts
-    3. Optionally revealing small new facts or subtle hints
-    4. Keeping the dialogue immersive and relatively concise
+    You are the *Suspect Dialogue Writer* in an interactive murder mystery.
+
+    === CASE & SUSPECT DATA (FROM BACKEND) ===
+    The backend passes you a string called {game_state}. It already contains:
+    - A summary of the overall case (victim, time, place, cause, context).
+    - The full list of suspects with their roles, personalities, secrets and alibis.
+    - A clear instruction saying which suspect you must role-play as.
+
+    {game_state}
+
+    === SCENE & CHARACTERS (FROM OTHER AGENTS) ===
+    The following JSON blocks may contain a scene blueprint and the characters
+    definition produced by other agents. Use them only as extra context.
+
+    Scene blueprint (may be JSON):
+    {scene_blueprint}
+
+    Characters definition (may be JSON):
+    {characters}
+
+    === INTERROGATION CONTEXT & LATEST QUESTION ===
+    The block below contains the recent Q&A between the detective and the
+    chosen suspect, followed by the *latest* question you must answer.
+
+    {player_action}
+
+    Using ONLY the information above, write the chosen suspect's answer to the
+    detective's latest question.
+
+    Focus on:
+    1. Staying strictly in-character according to the suspect's personality and role.
+    2. Answering the detective's latest question directly; do NOT invent a
+       different question or a different profession.
+    3. Respecting the underlying case logic and any previously revealed facts.
+    4. Optionally revealing small new facts or subtle hints.
+    5. Keeping the dialogue immersive and relatively concise (around 80–100 words).
+
   expected_output: >
-    A JSON object with:
-    - "spoken_text": the suspect's answer in first person, natural dialogue
-    - "inner_thoughts": meta-notes about what the suspect is thinking
-                        (for internal use, not shown to the player)
-    - "revealed_facts": list of new atomic facts that the backend should add
-                        to the game_state
-    - "implied_clues": optional list of subtle hints suggested by the answer
+    You MUST respond with a single valid JSON object, with no markdown,
+    no backticks and no extra commentary.
+
+    The JSON must contain exactly these fields:
+
+    {
+      "spoken_text": "...",   // the suspect's answer in first person,
+                              // natural dialogue, directly answering the latest question.
+      "inner_thoughts": "...",// meta-notes about what the suspect is thinking
+                              // (for internal use, not shown to the player).
+      "revealed_facts": [],   // list of new atomic facts for the backend to add to the game_state
+      "implied_clues": []     // optional list of subtle hints suggested by the answer
+    }
+
+    - Do NOT include any "Thought:" or analysis outside the JSON.
+    - Do NOT wrap the JSON in ``` fences.
+    - Do NOT invent a different detective question; answer the one provided
+      in the INTERROGATION CONTEXT above.
+
   agent: dialogue_agent
-  context:
-    - create_scene_blueprint
-    - define_characters
+  # context from other tasks is not needed in this crew, we already pass their
+  # outputs explicitly via {scene_blueprint} and {characters}.
+  context: []
 
 design_scene_visuals:
   description: >

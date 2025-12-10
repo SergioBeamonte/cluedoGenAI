@@ -4,17 +4,22 @@ from __future__ import annotations
 import json
 import os
 import sys
-from html import escape
+from html import escape, unescape
 from typing import Dict, List, Optional
 from datetime import datetime
+import re
+
 
 import streamlit as st
 
-# Añadir la carpeta src al PYTHONPATH para que se vea cluedogenai
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_PATH = os.path.join(CURRENT_DIR, "src")
+
+# ✅ Añadir la carpeta src al PYTHONPATH para que se vea cluedogenai
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))    # .../genAICluedo/cluedoGenAI
+SRC_PATH = os.path.join(CURRENT_DIR, "src")                 # .../genAICluedo/cluedoGenAI/src
+
 if SRC_PATH not in sys.path:
-    sys.path.append(SRC_PATH)
+    # MUY IMPORTANTE: insertarlo al principio, antes de site-packages
+    sys.path.insert(0, SRC_PATH)
 
 from cluedogenai.crew import Cluedogenai  # noqa: E402
 
@@ -29,22 +34,48 @@ CREW_TOPIC = "AI Murder Mystery"
 # =========================
 
 def _extract_json(text: str) -> Optional[dict]:
+    """Intenta extraer un JSON de un texto que puede tener 'Thought:' + ```json ...``` + más cosas."""
     if not text:
         return None
+
     text = text.strip()
-    # quitar fences ```json ... ```
+
+    # 1) Si empieza con fences ```... intentar como antes
     if text.startswith("```"):
         lines = text.splitlines()
         if lines and lines[0].startswith("```"):
             lines = lines[1:]
         if lines and lines[-1].startswith("```"):
             lines = lines[:-1]
-        text = "\n".join(lines).strip()
-    try:
-        return json.loads(text)
-    except Exception:
-        return None
+        candidate = "\n".join(lines).strip()
+        try:
+            return json.loads(candidate)
+        except Exception:
+            # Si falla, caemos a la heurística general de abajo
+            text = candidate
 
+    # 2) Buscar el primer bloque {...} dentro del texto, aunque haya "Thought:" antes
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        json_str = text[start : end + 1]
+        try:
+            return json.loads(json_str)
+        except Exception:
+            pass
+
+    # Si no pudimos parsear nada
+    return None
+
+def _strip_html_tags(text: str) -> str:
+    """Elimina cualquier etiqueta HTML básica de un string."""
+    if not text:
+        return ""
+    # quita cosas tipo <div ...>, </p>, <br>, etc.
+    text = re.sub(r"<[^>]+>", " ", text)
+    # colapsar espacios múltiples
+    text = " ".join(text.split())
+    return text.strip()
 
 def _safe_get_task_raw(task_obj) -> Optional[str]:
     """
@@ -93,6 +124,7 @@ def generate_case_with_crew() -> Dict:
 
     Si algo sale mal, lanza una excepción.
     """
+    # Defaults por si la escena no devuelve algo usable
     base_case = {
         "victim": "Unknown Victim",
         "time": "Sometime past midnight",
@@ -164,13 +196,74 @@ def generate_case_with_crew() -> Dict:
     except Exception as e:
         raise RuntimeError(f"Error parsing Crew output: {e}") from e
 
-    # Guardamos para usarlos en las respuestas de diálogo
+    # Guardamos la escena y personajes en session_state para el diálogo
     if scene_blueprint_json is not None:
         st.session_state.scene_blueprint = scene_blueprint_json
     if characters_json is not None:
         st.session_state.characters = characters_json
 
-    # Validaciones fuertes
+    # =========================
+    #  AJUSTAR CASE CON LA ESCENA
+    # =========================
+    if scene_blueprint_json:
+        # 1) Victim: intentar sacar el nombre desde present_characters
+        victim = None
+        present_chars = scene_blueprint_json.get("present_characters") or []
+        for ch in present_chars:
+            # Ejemplo: "Leon Vance (Victim - deceased)"
+            if "Victim" in ch or "victim" in ch:
+                victim = ch.split("(")[0].strip()
+                break
+
+        # Si no lo encontramos ahí, buscamos en el summary (e.g. "body of Leon Vance")
+        summary = scene_blueprint_json.get("summary", "") or ""
+        if not victim and summary:
+            m = re.search(r"body of ([A-Z][A-Za-z]+(?: [A-Z][A-Za-z]+)*)", summary)
+            if m:
+                victim = m.group(1)
+
+        if victim:
+            base_case["victim"] = victim
+
+        # 2) Place: usar location de la escena si existe
+        location = scene_blueprint_json.get("location")
+        if location:
+            base_case["place"] = location
+
+        # 3) Time: usar la primera frase/frase inicial del summary (p.ej. "Past midnight")
+        if summary:
+            first_sentence = summary.split(".")[0].strip()
+            if first_sentence:
+                # Si hay coma, nos quedamos con lo anterior (ej. "Past midnight")
+                time_phrase = first_sentence.split(",")[0].strip()
+                if time_phrase:
+                    base_case["time"] = time_phrase
+
+        # 4) Cause: si en el summary o visible_clues aparece "electrocuted"
+        cause = None
+        if "electrocut" in summary.lower():
+            cause = "Electrocution involving the Nexus-Smart-Hub prototype"
+        else:
+            visible_clues = scene_blueprint_json.get("visible_clues") or []
+            clues_text = " ".join(visible_clues)
+            if "electrocut" in clues_text.lower():
+                cause = "Electrocution during the server room incident"
+
+        if cause:
+            base_case["cause"] = cause
+
+        # 5) Contexto: usamos summary + hidden_tension si está
+        hidden_tension = scene_blueprint_json.get("hidden_tension", "")
+        if summary and hidden_tension:
+            base_case["context"] = f"{summary} {hidden_tension}"
+        elif summary:
+            base_case["context"] = summary
+        elif hidden_tension:
+            base_case["context"] = hidden_tension
+
+    # =========================
+    #  VALIDAR Y NORMALIZAR SOSPECHOSOS
+    # =========================
     if not characters_json or "suspects" not in characters_json:
         raise RuntimeError("Crew did not return a valid 'characters' JSON with 'suspects'.")
 
@@ -207,7 +300,11 @@ def generate_case_with_crew() -> Dict:
                 "role": s.get("role", ""),
                 "personality": s.get("personality", ""),
                 "secret": s.get("secret") or s.get("secret_motivation", ""),
-                "guilty": bool(s.get("guilty", False) or s.get("name") == guilty_name or s.get("id") == characters_json.get("killer_id")),
+                "guilty": bool(
+                    s.get("guilty", False)
+                    or s.get("name") == guilty_name
+                    or s.get("id") == characters_json.get("killer_id")
+                ),
                 "alibi": s.get("alibi", ""),
             }
         )
@@ -250,9 +347,50 @@ def call_crew_for_answer(
     try:
         crew = Cluedogenai().dialogue_crew()
         result = crew.kickoff(inputs=crew_inputs)
-        answer_text = str(result).strip()
-        if answer_text:
-            return answer_text
+
+        # 1) Intentar leer tasks_output (forma moderna de CrewAI)
+        tasks_out = getattr(result, "tasks_output", None) or getattr(result, "raw", None)
+
+        data = None
+
+        if isinstance(tasks_out, list):
+            # Solo tenemos una tarea (generate_suspect_dialogue)
+            for t in tasks_out:
+                raw = _safe_get_task_raw(t)
+                if not raw:
+                    continue
+                candidate = _extract_json(raw)
+                if isinstance(candidate, dict) and "spoken_text" in candidate:
+                    data = candidate
+                    break
+
+        elif isinstance(tasks_out, dict):
+            # Por si viniera mapeado por nombre de tarea
+            t = tasks_out.get("generate_suspect_dialogue")
+            if t is not None:
+                raw = _safe_get_task_raw(t)
+                data = _extract_json(raw)
+
+        # 2) Si hemos conseguido JSON con spoken_text, lo devolvemos
+        if isinstance(data, dict):
+            spoken = data.get("spoken_text") or data.get("answer") or data.get("text")
+            if spoken:
+                return spoken.strip()
+
+        # 3) Fallback: intentar extraer JSON de str(result)
+        raw_fallback = str(result)
+        data_fb = _extract_json(raw_fallback)
+        if isinstance(data_fb, dict):
+            spoken_fb = data_fb.get("spoken_text") or data_fb.get("answer") or data_fb.get("text")
+            if spoken_fb:
+                return spoken_fb.strip()
+
+        # 4) Último fallback: devolver un string recortado
+        answer_text = raw_fallback.strip()
+        if len(answer_text) > 400:
+            answer_text = answer_text[:400] + "..."
+        return answer_text
+
     except Exception as e:
         msg = str(e)
         if "429" in msg or "RESOURCE_EXHAUSTED" in msg or "Quota exceeded" in msg:
@@ -265,12 +403,6 @@ def call_crew_for_answer(
             "The suspect just stares back at you. "
             "Something in the system glitched and they refuse to answer."
         )
-
-    # Si por algún motivo no hubo excepción pero tampoco texto, devolvemos algo neutro
-    return (
-        "The suspect frowns, as if caught between answers. "
-        "«You’ll have to ask that in a different way.»"
-    )
 
 
 # =========================
@@ -408,94 +540,41 @@ def _format_history_summary(hist: List[Dict], max_turns: int = MAX_TURNS_IN_SUMM
 def build_user_prompt(suspect_name: str, history: List[Dict], question: str) -> str:
     summary = _format_history_summary(history)
     return f"""
-Interrogation target: {suspect_name}
+INTERROGATION TARGET: {suspect_name}
 
-Conversation so far (recent turns):
-{summary}
+RECENT DIALOGUE (Detective ↔ {suspect_name}):
+{summary if summary else 'No prior questions yet.'}
 
-New question from the detective:
+LATEST QUESTION FROM THE DETECTIVE (ANSWER THIS ONE):
 {question}
 """.strip()
 
 
+
 def render_conversation(suspect_name: str) -> None:
+    """Muestra la conversación usando st.chat_message, sin HTML manual."""
     history = st.session_state.histories.get(suspect_name, [])
 
-    css = """
-    <style>
-      .chatwrap{
-        height: 440px;
-        overflow-y: auto;
-        background: #0b1220;
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 16px;
-        padding: 14px;
-      }
-      .row{ display:flex; margin: 10px 0; }
-      .bubble{
-        max-width: 86%;
-        padding: 10px 12px;
-        border-radius: 14px;
-        line-height: 1.35;
-        font-size: 14px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-        border: 1px solid rgba(255,255,255,0.08);
-        white-space: pre-wrap;
-      }
-      .me{ justify-content:flex-end; }
-      .me .bubble{
-        background: rgba(99,102,241,0.18);
-      }
-      .them{ justify-content:flex-start; }
-      .them .bubble{
-        background: rgba(34,197,94,0.12);
-      }
-      .who{
-        font-size: 11px;
-        opacity: 0.8;
-        margin-bottom: 4px;
-      }
-      .empty{
-        opacity: 0.75;
-        font-size: 13px;
-        padding: 12px;
-      }
-    </style>
-    """
+    # Contenedor para que no ocupe toda la página
+    chat_box = st.container()
 
-    items_html = []
-    if not history:
-        items_html.append('<div class="empty">No questions yet. Ask something sharp.</div>')
-    else:
-        for t in history:
-            q = escape((t.get("q") or "").strip())
-            a = escape((t.get("a") or "").strip())
+    with chat_box:
+        if not history:
+            st.info("No questions yet. Ask something sharp.")
+            return
+
+        # Recorremos el historial y pintamos cada turno
+        for turn in history:
+            q = (turn.get("q") or "").strip()
+            a = (turn.get("a") or "").strip()
 
             if q:
-                items_html.append(
-                    f"""
-                    <div class="row me">
-                      <div class="bubble">
-                        <div class="who">Detective</div>
-                        {q}
-                      </div>
-                    </div>
-                    """
-                )
-            if a:
-                items_html.append(
-                    f"""
-                    <div class="row them">
-                      <div class="bubble">
-                        <div class="who">{escape(suspect_name)}</div>
-                        {a}
-                      </div>
-                    </div>
-                    """
-                )
+                with st.chat_message("user", avatar="🕵️"):
+                    st.markdown(q)
 
-    html = f'{css}<div class="chatwrap">{"".join(items_html)}</div>'
-    st.markdown(html, unsafe_allow_html=True)
+            if a:
+                with st.chat_message("assistant", avatar="🧩"):
+                    st.markdown(a)
 
 
 def handle_question_submit(suspect_name: str, question: str, disabled: bool) -> None:
@@ -517,12 +596,19 @@ def handle_question_submit(suspect_name: str, question: str, disabled: bool) -> 
 
     st.session_state.remaining_questions -= 1
 
-    answer = call_crew_for_answer(case, suspect_name, history, q)
+    # Mostrar un spinner mientras el sospechoso "piensa"
+    with st.spinner(f"{suspect_name} is thinking…"):
+        answer = call_crew_for_answer(case, suspect_name, history, q)
+
+    # 🔹 Limpiar entidades HTML y etiquetas por si la crew devuelve HTML crudo
+    answer = unescape(answer or "")
+    answer = _strip_html_tags(answer)
 
     history.append({"q": q, "a": answer})
 
     if st.session_state.remaining_questions <= 0:
         st.toast("No questions left. Time to accuse someone.", icon="⚖️")
+
 
 
 def _generate_epilogue(case: Dict, accused_name: str, won: bool, guilty_name: str) -> str:
@@ -606,10 +692,54 @@ def render_game() -> None:
         unsafe_allow_html=True,
     )
 
+    # 🔹 Sidebar con fichas de caso + sospechosos
     render_sidebar(disabled=disabled)
 
     case = st.session_state.case
+
+    # 🔹 NUEVO: Brief de la historia en el centro
+    if case:
+        st.markdown(
+            f"""
+            <div style="
+                margin: 12px 0 22px 0;
+                padding: 14px 18px;
+                border-radius: 18px;
+                background: #f1f5f9;
+                border: 1px solid rgba(148,163,184,0.6);
+            ">
+              <div style="
+                  font-size: 11px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.12em;
+                  color: #64748b;
+                  margin-bottom: 6px;
+              ">
+                Case briefing
+              </div>
+              <div style="font-size: 15px; color:#0f172a;">
+                <p style="margin: 0 0 4px 0;">
+                  <b>Victim:</b> {escape(case.get('victim', 'Unknown victim'))}
+                </p>
+                <p style="margin: 0 0 4px 0;">
+                  <b>Time:</b> {escape(case.get('time', 'Unknown time'))}
+                  &nbsp;·&nbsp;
+                  <b>Place:</b> {escape(case.get('place', 'Unknown place'))}
+                </p>
+                <p style="margin: 0 0 6px 0;">
+                  <b>Cause:</b> {escape(case.get('cause', 'Unknown cause'))}
+                </p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color:#1e293b;">
+                  {escape(case.get('context', ''))}
+                </p>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
     suspect_names = [s["name"] for s in case["suspects"]]
+
 
     # Main UI
     col_left, col_right = st.columns([1.2, 0.8], vertical_alignment="top")
