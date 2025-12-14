@@ -1,0 +1,77 @@
+{
+  "suspects": [
+    {
+      "id": "suspect_1",
+      "name": "Marcus O'Connell",
+      "role": "Security Guard",
+      "age": 48,
+      "personality": "Jumpy and easily flustered, but beneath the surface, there's a deep-seated resentment and a sense of territoriality over his perceived duties.",
+      "physical_description": {
+        "build": "fit",
+        "face": "weathered face with tired eyes and a perpetually worried expression",
+        "hair": "short-cropped brown hair, slightly thinning at the crown",
+        "upper_clothing": "dark blue security uniform shirt",
+        "distinctive_features": "a faint, jagged scar above his right eyebrow, always nervously adjusting his collar"
+      },
+      "clue_object": "A worn, dog-eared copy of the company's internal 'Employee Conduct Policy' manual, clutched tightly in his hand.",
+      "secret_motivation": "Believed Dr. Thorne was exposing company secrets or violating critical protocols, undermining the security he felt responsible for. He saw himself as protecting the company from internal threats.",
+      "alibi": "Claims he was doing his routine security rounds, found the body in the Innovation Lab, and immediately called for assistance.",
+      "guilty": true
+    },
+    {
+      "id": "suspect_2",
+      "name": "Maya Sharma",
+      "role": "Senior AI Engineer",
+      "age": 32,
+      "personality": "Brilliant and intensely focused, often perceived as aloof. She values intellectual challenge above all else and harbors a quiet disdain for inefficiency.",
+      "physical_description": {
+        "build": "skinny",
+        "face": "sharp features with intense, analytical dark eyes and a often-frowning brow",
+        "hair": "long black hair tied in a messy, functional bun",
+        "upper_clothing": "bright green t-shirt",
+        "distinctive_features": "a subtle, almost imperceptible tremor in her left hand when stressed, rarely makes eye contact"
+      },
+      "clue_object": "A high-precision stylus pen, twirling restlessly between her fingers as if debugging a complex problem.",
+      "secret_motivation": "Discovered Dr. Thorne was taking credit for her crucial algorithmic breakthroughs and was about to present them as his own at an upcoming conference, threatening her career advancement.",
+      "alibi": "Was working remotely on a critical bug fix for a different project, claims to have been online the entire evening, collaborating with an overseas colleague via video call.",
+      "guilty": false
+    },
+    {
+      "id": "suspect_3",
+      "name": "Liam Chen",
+      "role": "Hardware Development Lead",
+      "age": 39,
+      "personality": "Reserved and detail-oriented, with a perfectionist streak. He's passionate about the physical manifestation of technology and feels undervalued compared to the software team.",
+      "physical_description": {
+        "build": "fit",
+        "face": "serious expression with a perpetually furrowed brow, often peering over his glasses",
+        "hair": "neatly styled, short light brown hair",
+        "upper_clothing": "grey polo shirt",
+        "distinctive_features": "oil stains on his fingertips despite apparent cleanliness, often adjusts his thick-rimmed glasses"
+      },
+      "clue_object": "A small, specialized torque wrench, which he absently clicks open and shut, its metallic sound barely audible.",
+      "secret_motivation": "Was fiercely protective of his robotic arm prototypes and suspected Dr. Thorne was recklessly pushing experimental limits, jeopardizing the integrity of his designs and his professional reputation.",
+      "alibi": "Was in the workshop, located on a different floor, performing emergency maintenance on another prototype that had a power surge during the storm, has timestamped log entries from equipment diagnostics.",
+      "guilty": false
+    },
+    {
+      "id": "suspect_4",
+      "name": "Chloe Davis",
+      "role": "Project Manager",
+      "age": 35,
+      "personality": "Energetic and outwardly optimistic, but deeply pragmatic and financially driven. She prioritizes project deadlines and budget adherence above creative whims.",
+      "physical_description": {
+        "build": "fit",
+        "face": "expressive face with a quick, nervous smile that doesn't quite reach her eyes",
+        "hair": "shoulder-length blonde hair, perfectly straightened",
+        "upper_clothing": "vibrant purple blazer",
+        "distinctive_features": "always wears a high-end smartwatch and several intricate silver rings on her right hand"
+      },
+      "clue_object": "A small, elaborately designed stress ball in the shape of a gear, which she squeezes rhythmically, almost unconsciously.",
+      "secret_motivation": "Discovered Dr. Thorne was secretly diverting significant project funds for highly speculative personal research, threatening to derail a critical company initiative and expose her lax oversight to investors.",
+      "alibi": "Claims she was at a late-night video conference call with overseas investors, though her connection was reportedly spotty due to the severe storm.",
+      "guilty": false
+    }
+  ],
+  "guilty_name": "Marcus O'Connell"
+}

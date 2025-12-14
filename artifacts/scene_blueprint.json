@@ -1,0 +1,38 @@
+```json
+{
+  "scene_id": "OpeningScene_Discovery",
+  "location": "The 'Innovation Lab' at Veridian Dynamics Office",
+  "summary": "A violent storm rages outside, plunging the Veridian Dynamics office into a flickering half-light. The player, either working late or arriving for an urgent matter, is met by a panicked security guard, Marcus, who leads them to the Innovation Lab. There, Dr. Aris Thorne, the brilliant but enigmatic lead AI architect, is found dead amidst a tangle of sparking, damaged smart equipment, the victim of a supposed 'accident'.",
+  "present_characters": [
+    "Marcus O'Connell",
+    "Player Character"
+  ],
+  "beats": [
+    "Player arrives/is at the office, power flickers erratically, an alarm blares briefly before cutting out.",
+    "Marcus O'Connell, visibly agitated and disheveled, rushes towards the player, demanding immediate help and exclaiming about a 'terrible accident'.",
+    "Marcus explains he found something 'unbelievable' in the Innovation Lab and needs someone else to confirm, expressing fear and confusion.",
+    "Player and Marcus proceed to the Innovation Lab, a tense, dim walk through the deserted, storm-battered office corridors.",
+    "Discovery of Dr. Aris Thorne's body, slumped over a console, surrounded by severely damaged robotic equipment and live, sparking wires.",
+    "Marcus, overwhelmed and pale, immediately declares it a tragic 'equipment malfunction', urging caution around the live wires.",
+    "Player has their first opportunity to examine the immediate scene and the victim, while Marcus struggles to regain composure."
+  ],
+  "visible_clues": [
+    "Dr. Aris Thorne's body, clearly deceased, with visible burns and contusions suggesting electrocution or impact from heavy machinery.",
+    "A state-of-the-art robotic arm prototype, partially dismantled and emitting small sparks, one of its powerful manipulators bent at an unnatural, stressed angle.",
+    "A high-end server rack, its reinforced glass panel shattered inwards, revealing damaged internal components and scorch marks.",
+    "A puddle of spilled, cold coffee or energy drink near Thorne's outstretched, rigid hand.",
+    "A small, jagged metallic shard, unlike any common office material, glinting subtly near the victim's feet, partially hidden by debris.",
+    "The relentless flickering of emergency overhead lights, creating disorienting light and shadow play."
+  ],
+  "hidden_tension": "Marcus's immediate 'accident' assessment feels overly defensive, hinting that he either suspects foul play himself and is trying to contain the situation, or he's deliberately trying to deflect attention. The state of the equipment and the unique shard suggest more than a simple malfunction.",
+  "music_mood": "Tense and Eerie",
+  "visual_hooks": [
+    "Torrential rain lashing against large office windows, intermittently illuminated by distant lightning flashes, casting dramatic silhouettes.",
+    "Flickering fluorescent lights above, occasionally plunging the Innovation Lab into near-darkness, then back to a harsh, strobing glow that distorts perceptions.",
+    "The dramatic, almost monstrous, silhouette of advanced, damaged robotics against the dim, stormy backdrop, appearing menacing and chaotic.",
+    "The unnerving stillness of Dr. Thorne's body, starkly contrasted by the constant, erratic sparks and hums from the damaged equipment.",
+    "A single, faint emergency exit sign casting a sickly green glow down a deserted, water-streaked corridor leading to the lab, emphasizing isolation."
+  ],
+  "victim_name": "Dr. Aris Thorne"
+}
+```
