@@ -436,6 +436,9 @@ def _scan_audio_assets() -> Dict[str, List[str]]:
     print("[MUSIC] Scanned tracks:", tracks)
     return tracks
 
+def stop_current_audio():
+    st.session_state.current_audio_bytes = None
+    st.session_state.current_audio_key = f"audio_stop_{time.time_ns()}"
 
 def trigger_question_sound_local() -> None:
     tracks = st.session_state.get("music_tracks", {})
@@ -453,19 +456,24 @@ def trigger_question_sound_local() -> None:
 
 
 def trigger_accusation_sound_local() -> None:
+    # 1️⃣ PARAR lo que esté sonando
+    stop_current_audio()
+
     tracks = st.session_state.get("music_tracks", {})
+
+    # ================== ACCUSATION SFX ==================
     pool = tracks.get("accuse", []) or []
     if pool:
         path = random.choice(pool)
         try:
             with open(path, "rb") as f:
-                st.session_state.last_sfx_bytes = f.read()
-                st.session_state._sfx_key = f"sfx_{int(time.time() * 1000)}"
+                st.session_state.current_audio_bytes = f.read()
+                st.session_state.current_audio_key = f"sfx_{time.time_ns()}"
         except Exception:
-            st.session_state.last_sfx_bytes = None
-    else:
-        print("No accusation SFX available")
+            st.session_state.current_audio_bytes = None
 
+    time.sleep(10)  # esperar a que termine el SFX
+    # ================== ENDING MUSIC ==================
     ending_pool = tracks.get("ending", []) or []
     if ending_pool:
         chosen_ending = random.choice(ending_pool)
@@ -473,10 +481,8 @@ def trigger_accusation_sound_local() -> None:
             st.session_state._pending_ending_data_url = file_to_data_url(chosen_ending)
             st.session_state._pending_switch_to_ending = True
         except Exception:
-            st.session_state._pending_ending_data_url = None
             st.session_state._pending_switch_to_ending = False
-    else:
-        st.session_state._pending_switch_to_ending = False
+
 
 
 def file_to_data_url(path: str) -> Optional[str]:
